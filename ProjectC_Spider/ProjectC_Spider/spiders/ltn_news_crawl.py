@@ -11,7 +11,7 @@ class ltnNewsSpider(scrapy.Spider):
         for news in response.xpath('/html/body/div[10]'):
                 title = news.css('div.whitecon:nth-child(16) > h1:nth-child(1)::text').get(), #獲取標題(ltn的whitecon:nth-child(數目),數目要+1)
                 time = news.css('.time::text').get(), #獲取文章時間
-                author = news.xpath('/html/body/div[10]/section/div[5]/div[2]/p[1]/text()').re(r'〔\w+'), #獲取作者
+                author = news.css('.text > p:nth-child(3)').re(r'〔.*〕'), #獲取作者
                 content_html = news.css('.text').get(), #獲取內文HTML
                 content= ''.join('%s' %id for id in content_html) #將內文HTML轉換成String
                 time=''.join('%s' %id for id in time) #將時間轉換成String
