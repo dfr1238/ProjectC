@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup
 class ltnNewsSpider(scrapy.Spider):
     name = "news.ltn.com.tw" #爬蟲名稱
     allowed_domains = ['news.ltn.com.tw/'] #允許網域
-    start_urls = ['https://news.ltn.com.tw/news/politics/breakingnews/3177607'] #起始網址
+    start_urls = ['https://news.ltn.com.tw/news/politics/breakingnews/3177607','https://news.ltn.com.tw/news/world/breakingnews/3182932',
+    'https://news.ltn.com.tw/news/world/breakingnews/3182910','https://news.ltn.com.tw/news/life/breakingnews/3182911'] #起始網址
 
     def parse(self, response):
         content = ''
