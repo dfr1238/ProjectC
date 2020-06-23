@@ -1,16 +1,26 @@
 import scrapy
 import requests
 from bs4 import BeautifulSoup
+from scrapy.exceptions import CloseSpider
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
 
 
 class TVBSSpider(scrapy.Spider):
+    keywords = ''
     name = "news.tvbs.com.tw"#爬蟲名稱
     allowed_domains = ['news.tvbs.com.tw/']#允許網域
-    def start_requests(self):#更換網址
-        for a in self.keywordsSearch():
-            yield scrapy.Request(a)
+    ###拒絕網域
+    rules = (
+        Rule(LinkExtractor(deny=('news/searchresult/*')), callback = 'parse'))
+
+    def start_requests(self):#爬蟲開始
+        TVBSSpider.SearchKeywords()
+        for page in range(3):
+            for new in self.CrawlHref(page):
+                yield scrapy.Request(new, callback=self.parse)
+
     def parse(self, response):
-        #content = ''
         for n in response.css('body'):
             title = n.css('h1::text').get(default = '沒有抓到')#獲取標題
             #處理TVBS特殊標題格式
@@ -43,16 +53,19 @@ class TVBSSpider(scrapy.Spider):
         content = content.replace('】','')
         content = content.replace('','')
         return content
-    def SearchHref(self,keywords):#抓標題網址
+
+    def CrawlHref(self,page):#抓每一頁的網址
         google = 'https://www.google.com'
-        GoogleSearch = 'https://www.google.com/search?q=site:news.tvbs.com.tw%20'#tvbs網域
-        url = GoogleSearch + keywords
-        r = requests.get(url)
+        GoogleSearch = 'https://www.google.com/search?q=site:news.tvbs.com.tw+' + self.keywords + '&ie=UTF-8&start='+ str(page) + '0&sa=N'#TVBS網域
+        r = requests.get(GoogleSearch)
         soup = BeautifulSoup(r.text,'html.parser')
         get_href = soup.select('div.kCrYT a')
         for g in get_href:
             yield google + g.get('href')
-    def keywordsSearch(self):#收尋關鍵字
-        keywords = str(input("輸入您要收尋的關鍵字:"))
-        keywords_url = self.SearchHref(keywords)#進入SearchHref()方法
-        return keywords_url   
+    
+    @classmethod
+    def SearchKeywords(cls):
+        cls.keywords = str(input("輸入您要收尋的關鍵字:"))
+    
+
+

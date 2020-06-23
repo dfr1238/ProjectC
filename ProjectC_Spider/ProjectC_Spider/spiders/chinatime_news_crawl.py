@@ -3,9 +3,15 @@ import requests
 from bs4 import BeautifulSoup
 
 class ChinatimeNewsSpider(scrapy.Spider):
+    keywords = ''
     name = "www.chinatimes.com"#爬蟲名稱
     allowed_domains = ['www.chinatimes.com/']#允許網域
-    start_urls = ['https://www.chinatimes.com/realtimenews/20200516002044-260410?chdtv']#起始網址
+
+    def start_requests(self):#更換網址
+        ChinatimeNewsSpider.SearchKeywords()
+        for page in range(3):#爬取3頁
+            for new in self.CrawlHref(page):
+                yield scrapy.Request(new, callback=self.parse)
     def parse(self, response):
         for n in response.css('body.content-article'):
             title = n.css('h1.article-title::text').get(default = '沒有抓到'),#獲取標題
@@ -25,4 +31,15 @@ class ChinatimeNewsSpider(scrapy.Spider):
                 'content' : content,
                 'source' : source
             }
-            
+    def CrawlHref(self,page):#抓每一頁的網址
+        google = 'https://www.google.com'
+        GoogleSearch = 'https://www.google.com/search?q=site:www.chinatimes.com+' + self.keywords +'&start=' + str(page) + '0&sa=N'#chinatime網域
+        r = requests.get(GoogleSearch)
+        soup = BeautifulSoup(r.text,'html.parser')
+        get_href = soup.select('div.kCrYT a')
+        for g in get_href:
+            yield google + g.get('href')
+
+    @classmethod
+    def SearchKeywords(cls):#關鍵字嵌入
+        cls.keywords = str(input("輸入您要收尋的關鍵字:"))
