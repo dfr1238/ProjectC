@@ -1,6 +1,14 @@
 # ProjectC
 資訊一致性彙整系統
 
+##版本需求
+----
+scrapy >=2.3.0
+beautifulsoup4 >= 4.9.1
+python 3.7.7
+tensorflow 1.15.0
+tensorflow-gpu 1.15.0
+CkipTagger >= 0.1.1
 
 ##一般填寫程式碼注意
 ----
