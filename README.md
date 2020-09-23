@@ -1,7 +1,7 @@
 # ProjectC
 資訊一致性彙整系統
 
-版本需求
+套件需求
 ----
 - scrapy >=2.3.0
 - beautifulsoup4 >= 4.9.1
