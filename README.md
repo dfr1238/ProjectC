@@ -9,6 +9,10 @@
 - tensorflow>=1.13.1
 - tensorflow-gpu>=1.13.1
 - CkipTagger >= 0.2.1
+- nltk
+- TrendReq
+- requests
+- google-api-python-client
 
 一般填寫程式碼注意
 ----
