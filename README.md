@@ -1,22 +1,22 @@
 # ProjectC
 資訊一致性彙整系統
 
-##版本需求
+版本需求
 ----
-scrapy >=2.3.0
-beautifulsoup4 >= 4.9.1
-python >=3.8.5
-tensorflow>=1.13.1
-tensorflow-gpu>=1.13.1
-CkipTagger >= 0.2.1
+- scrapy >=2.3.0
+- beautifulsoup4 >= 4.9.1
+- python >=3.8.5
+- tensorflow>=1.13.1
+- tensorflow-gpu>=1.13.1
+- CkipTagger >= 0.2.1
 
-##一般填寫程式碼注意
+一般填寫程式碼注意
 ----
 1.請包含註解
 
 2.換行符號請用LF
 
-##爬蟲維護注意選項
+爬蟲維護注意選項
 ----
 如果有需要新增新的爬蟲的話，請注意:
 
