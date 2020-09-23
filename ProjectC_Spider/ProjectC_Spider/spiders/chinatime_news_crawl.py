@@ -5,13 +5,14 @@ from bs4 import BeautifulSoup
 class ChinatimeNewsSpider(scrapy.Spider):
     keywords = ''
     name = "www.chinatimes.com"#爬蟲名稱
+    start_urls = [] #起始網址
     allowed_domains = ['www.chinatimes.com/']#允許網域
 
-    def start_requests(self):#更換網址
-        ChinatimeNewsSpider.SearchKeywords()
-        for page in range(3):#爬取3頁
-            for new in self.CrawlHref(page):
-                yield scrapy.Request(new, callback=self.parse)
+    #def start_requests(self):#更換網址
+        #ChinatimeNewsSpider.SearchKeywords()
+        #for page in range(3):#爬取3頁
+            #for new in self.CrawlHref(page):
+                #yield scrapy.Request(new, callback=self.parse)
     def parse(self, response):
         for n in response.css('body.content-article'):
             title = n.css('h1.article-title::text').get(default = '沒有抓到'),#獲取標題
@@ -29,7 +30,7 @@ class ChinatimeNewsSpider(scrapy.Spider):
                 'time' : time,
                 'author' : author,
                 'content' : content,
-                'source' : source
+                'source' : self.name
             }
     def CrawlHref(self,page):#抓每一頁的網址
         google = 'https://www.google.com'

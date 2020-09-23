@@ -23,5 +23,5 @@ class cnaNewsSpider(scrapy.Spider):
                     'time' : time,
                     'author' :author,
                     'content' :content,
-                    'source':source,
+                    'source':self.name,
                 }

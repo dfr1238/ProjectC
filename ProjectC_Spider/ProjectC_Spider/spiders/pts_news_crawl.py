@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 class ptsNewsSpider(scrapy.Spider):
     name = "news.pts.org.tw" #爬蟲名稱
     allowed_domains = ['news.pts.org.tw/'] #允許網域
-    start_urls = ['https://news.pts.org.tw/article/473677','https://news.pts.org.tw/article/480307'] #起始網址
+    start_urls = [] #起始網址
 
     def parse(self, response):
         content = ''
@@ -16,11 +16,10 @@ class ptsNewsSpider(scrapy.Spider):
                 soup = BeautifulSoup(content,"lxml") #創立BS4處理
                 content=soup.get_text() #使用BS4將HTML轉至文字
                 content=' '.join(content.split()) #去除額外的標籤與unicode的部分
-                source = '公視新聞網' #設定來源
                 yield { #回傳資訊
                     'title' : title,
                     'time' : time,
                     'author' :author,
                     'content' :content,
-                    'source':source,
+                    'source':self.name,
                 }

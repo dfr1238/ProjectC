@@ -26,7 +26,7 @@ class ltnNewsSpider(scrapy.Spider):
                     'time' : time,
                     'author' :author,
                     'content' :content,
-                    'source':source,
+                    'source':self.name,
                 }
     def ContentProcess(self,content):#LTN內容處理
         content = str(content)

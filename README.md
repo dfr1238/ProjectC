@@ -5,10 +5,10 @@
 ----
 scrapy >=2.3.0
 beautifulsoup4 >= 4.9.1
-python 3.7.7
-tensorflow 1.15.0
-tensorflow-gpu 1.15.0
-CkipTagger >= 0.1.1
+python >=3.8.5
+tensorflow>=1.13.1
+tensorflow-gpu>=1.13.1
+CkipTagger >= 0.2.1
 
 ##一般填寫程式碼注意
 ----

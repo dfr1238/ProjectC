@@ -10,15 +10,16 @@ class TVBSSpider(scrapy.Spider):
     keywords = ''
     name = "news.tvbs.com.tw"#爬蟲名稱
     allowed_domains = ['news.tvbs.com.tw/']#允許網域
+    start_urls = [] #起始網址
     ###拒絕網域
     rules = (
         Rule(LinkExtractor(deny=('news/searchresult/*')), callback = 'parse'))
 
-    def start_requests(self):#爬蟲開始
-        TVBSSpider.SearchKeywords()
-        for page in range(3):
-            for new in self.CrawlHref(page):
-                yield scrapy.Request(new, callback=self.parse)
+    #def start_requests(self):#爬蟲開始
+        #TVBSSpider.SearchKeywords()
+        #for page in range(3):
+            #for new in self.CrawlHref(page):
+                #yield scrapy.Request(new, callback=self.parse)
 
     def parse(self, response):
         for n in response.css('body'):
@@ -35,7 +36,7 @@ class TVBSSpider(scrapy.Spider):
                 'time' : time,
                 'author' : author,
                 'content' : content,
-                'source' : source
+                'source' : self.name
             }
     def ContentProcess(self,content):#TVBS專屬內文處理
         content = str(content)

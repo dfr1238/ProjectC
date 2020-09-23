@@ -6,13 +6,14 @@ from bs4 import BeautifulSoup
 class CtitvSpider(scrapy.Spider):
     keywords = ''
     name = "gotv.ctitv.com.tw"#爬蟲名稱
+    start_urls = [] #起始網址
     allowed_domains = ['gotv.ctitv.com.tw/']#允許網域
 
-    def start_requests(self):#爬蟲開始
-        CtitvSpider.SearchKeywords()
-        for page in range(3):#爬取3頁
-            for new in self.CrawlHref(page):#回傳網址
-                yield scrapy.Request(new, callback=self.parse)
+    #def start_requests(self):#爬蟲開始
+        #CtitvSpider.SearchKeywords()
+        #for page in range(3):#爬取3頁
+            #for new in self.CrawlHref(page):#回傳網址
+                #yield scrapy.Request(new, callback=self.parse)
 
     def parse(self, response):
         for n in response.css('body'):
@@ -30,7 +31,7 @@ class CtitvSpider(scrapy.Spider):
                 'time' : time,
                 'author' : author,
                 'content' : content,
-                'source' : source
+                'source' : self.name
             }
     def CrawlHref(self,page):#抓每一頁的網址
         google = 'https://www.google.com'
