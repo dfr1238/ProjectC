@@ -6,8 +6,7 @@
 - scrapy >=2.3.0
 - beautifulsoup4 >= 4.9.1
 - python >=3.8.5
-- tensorflow>=1.13.1
-- tensorflow-gpu>=1.13.1
+- tensorflow>=2.3.0
 - CkipTagger >= 0.2.1
 - nltk
 - TrendReq
