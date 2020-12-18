@@ -1,23 +1,26 @@
 from pytrends.request import TrendReq
-from ProjectC_Spider.ProjectC_Spider.spiders.mega_crawl import ChinatimeNewsSpider
-from ProjectC_Spider.ProjectC_Spider.spiders.mega_crawl import cnaNewsSpider
-from ProjectC_Spider.ProjectC_Spider.spiders.mega_crawl import CtitvSpider
-from ProjectC_Spider.ProjectC_Spider.spiders.mega_crawl import etTodayNewsSpider
-from ProjectC_Spider.ProjectC_Spider.spiders.mega_crawl import ltnNewsSpider
-from ProjectC_Spider.ProjectC_Spider.spiders.mega_crawl import ptsNewsSpider
-from ProjectC_Spider.ProjectC_Spider.spiders.mega_crawl import TVBSSpider
+from ProjectC_Spider.spiders.mega_crawl import ChinatimeNewsSpider
+from ProjectC_Spider.spiders.mega_crawl import cnaNewsSpider
+from ProjectC_Spider.spiders.mega_crawl import CtitvSpider
+from ProjectC_Spider.spiders.mega_crawl import etTodayNewsSpider
+from ProjectC_Spider.spiders.mega_crawl import ltnNewsSpider
+from ProjectC_Spider.spiders.mega_crawl import ptsNewsSpider
+from ProjectC_Spider.spiders.mega_crawl import TVBSSpider
 from googleapiclient.discovery import build
 import pandas as pd
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy.exceptions import CloseSpider
-from scrapy.crawler import CrawlerProcess
+from scrapy.crawler import CrawlerProcess, Crawler
+from scrapy.settings import Settings
 from scrapy.utils.project import get_project_settings
 import argparse
 import scrapy
 import requests
+import os
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+from protego import Protego
 
 search_List =[] #儲存熱搜
 urls_List = [] #儲存連結
@@ -33,13 +36,8 @@ def process_command():
 
 def startSpider():
     global urls_List
-    process = CrawlerProcess(settings={"AUTOTHROTTLE_ENABLED":True,"DOWNLOAD_DELAY":4.0,
-    "FEEDS": {
-        "news_article.json": {"format": "json",'encoding': 'utf8',
-        'store_empty': False,'fields': None,
-        'indent': 4,},
-    },
-})
+    process = CrawlerProcess(get_project_settings())
+
     for Url,keyWord in zip(urls_List,keysWords_List):
         Urls = [Url]
         if urlparse(Url).netloc == "www.chinatimes.com":
