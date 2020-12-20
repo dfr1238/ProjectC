@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from scrapy.exceptions import CloseSpider
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
+from ..items import VscodeSshScrapyTestItem
 
 class ChinatimeNewsSpider(scrapy.Spider):
     kW = ''
@@ -12,10 +13,11 @@ class ChinatimeNewsSpider(scrapy.Spider):
     allowed_domains = ['www.chinatimes.com']#允許網域
 
     def parse(self, response):
+        items = VscodeSshScrapyTestItem()#匯入items
         for n in response.css('div.article-wrapper'):
-            title = n.css('h1.article-title::text').get(default = '沒有抓到'),#獲取標題
-            time = n.css('div.meta-info > time::attr(datetime)').get(default = '沒有抓到'),#獲取文章日期、時間
-            author = n.css('div.author > a::text').get(default = '沒有抓到'),#獲取作者
+            items['title'] = n.css('h1.article-title::text').get(default = '沒有抓到'),#獲取標題
+            items['time'] = n.css('div.meta-info > time::attr(datetime)').get(default = '沒有抓到'),#獲取文章日期、時間
+            items['author'] = n.css('div.author > a::text').get(default = '沒有抓到'),#獲取作者
             content_html = n.css('div.article-body').get(), #獲取內文HTML
             remove_parts = n.css('div.promote-word > a::text').getall(), #獲取多餘內容
             remove_parts_2 = n.css('div.article-hash-tag > span.hash-tag > a::text').getall(), #獲取文章Hash-tag
@@ -27,17 +29,11 @@ class ChinatimeNewsSpider(scrapy.Spider):
             content=soup.get_text() #使用BS4將HTML轉至文字
             content=' '.join(content.split()) #去除額外的標籤與unicode的部分
             content=content.replace(remove_parts,'') #從內文移除額外內容
-            content=content.replace(remove_parts_2,'') #從內文移除Hash-tag
-            source = '中時電子報'#文章來源
-            yield{  #回傳資訊
-                'keyword': self.kW,
-                'title' : title,
-                'time' : time,
-                'author' : author,
-                'content' : content,
-                'source' : self.name,
-                'url': self.start_urls[0]
-            }
+            items['content']=content.replace(remove_parts_2,'') #從內文移除Hash-tag
+            items['source'] = '中時電子報'#文章來源
+            items['keyword'] = self.kW
+            items['url'] = self.start_urls[0]
+            yield(items)  #回傳資訊
 
 class cnaNewsSpider(scrapy.Spider):
     kW = ''
@@ -46,11 +42,12 @@ class cnaNewsSpider(scrapy.Spider):
     start_urls = [] #起始網址
 
     def parse(self, response):
+        items = VscodeSshScrapyTestItem()#匯入items
         content = ''
         for news in response.css('.centralContent'):
-                title = news.css('.centralContent > h1 > span::text').get(), #獲取標題
-                time = news.css('.updatetime > span:nth-child(1)::text').get(), #獲取文章時間
-                author = news.css('div.paragraph:nth-child(6) > p:nth-child(1)::text').re(r'（\w+）'), #獲取作者
+                items['title'] = news.css('.centralContent > h1 > span::text').get(), #獲取標題
+                items['time'] = news.css('.updatetime > span:nth-child(1)::text').get(), #獲取文章時間
+                items['author'] = news.css('div.paragraph:nth-child(6) > p:nth-child(1)::text').re(r'（\w+）'), #獲取作者
                 content_html = news.css('div.paragraph').get(), #獲取內文HTML
                 remove_parts = news.css('div.paragraph > .moreArticle').get() #獲取更多內容HTML
                 remove_parts = ''.join(remove_parts)
@@ -59,17 +56,12 @@ class cnaNewsSpider(scrapy.Spider):
                 content=content.replace(remove_parts,'') #從內文HTML移除更多內容
                 soup = BeautifulSoup(content,"lxml") #創立BS4處理
                 content=soup.get_text() #使用BS4將HTML轉至文字
-                content=' '.join(content.split()) #去除額外的標籤與unicode的部分
-                source = '中央通訊社' #設定來源
-                yield { #回傳資訊
-                    'keyword': self.kW,
-                    'title' : title,
-                    'time' : time,
-                    'author' :author,
-                    'content' :content,
-                    'source':self.name,
-                    'url': self.start_urls[0]
-                }
+                items['content']=' '.join(content.split()) #去除額外的標籤與unicode的部分
+                items['source'] = '中央通訊社' #設定來源
+                items['keyword'] = self.kW
+                items['url'] = self.start_urls[0]
+                yield (items) #回傳資訊
+
 
 class CtitvSpider(scrapy.Spider):
     kW = ''
@@ -77,31 +69,22 @@ class CtitvSpider(scrapy.Spider):
     start_urls = ['https://gotv.ctitv.com.tw/2020/10/1531205.htm'] #起始網址
     allowed_domains = ['gotv.ctitv.com.tw']#允許網域
 
-    #def start_requests(self):#爬蟲開始
-        #CtitvSpider.SearchKeywords()
-        #for page in range(3):#爬取3頁
-            #for new in self.CrawlHref(page):#回傳網址
-                #yield scrapy.Request(new, callback=self.parse)
-
     def parse(self, response):
+        items = VscodeSshScrapyTestItem()#匯入items
         for n in response.css('body'):
             title = n.css('h1.post-title.item.fn::text').get(default = '沒有抓到')#獲取標題
             #處理GOTV特殊標題格式
             title = title.replace('\n','')#去掉title(str)多餘的\n
             title = title.replace('\t','')#去掉title(str)多餘的\t
-            title = title.replace('\u3000','')#去掉title(str)多餘的\u3000
-            time = n.css('time.value-title::text').get(default = '沒有抓到')#獲取文章日期、時間
-            author = n.css('span.reviewer a::text').get(default = '沒有抓到')#獲取作者
-            content = n.css('div.post-content.description p::text').getall()#獲取文章內容
-            source = '中天GoTV'#文章來源
-            yield{ #回傳資訊
-                'keyword': self.kW,
-                'title' : title,
-                'time' : time,
-                'author' : author,
-                'content' : content,
-                'source' : self.name
-            }
+            items['title'] = title.replace('\u3000','')#去掉title(str)多餘的\u3000
+            items['time'] = n.css('time.value-title::text').get(default = '沒有抓到')#獲取文章日期、時間
+            items['author'] = n.css('span.reviewer a::text').get(default = '沒有抓到')#獲取作者
+            items['content'] = n.css('div.post-content.description p::text').getall()#獲取文章內容
+            items['source'] = '中天GoTV'#文章來源
+            items['keyword'] = self.kW
+            items['url'] = self.start_urls[0]
+            yield(items) #回傳資訊
+
 
 class etTodayNewsSpider(scrapy.Spider):
     kW = ''
@@ -110,29 +93,24 @@ class etTodayNewsSpider(scrapy.Spider):
     start_urls = ['https://www.ettoday.net/news/20201011/1829226.htm'] #起始網址
 
     def parse(self, response):
+        items = VscodeSshScrapyTestItem()#匯入items
         content = ''
         for news in response.css('div.c1'):
                 title_orginial = news.css('h1.title::text').get(), #獲取標題
-                time = news.css('time::attr(datetime)').get(), #獲取文章時間
-                author = news.css('.story > p:nth-child(2)::text').getall(), #獲取作者
+                items['time'] = news.css('time::attr(datetime)').get(), #獲取文章時間
+                items['author'] = news.css('.story > p:nth-child(2)::text').getall(), #獲取作者
                 content_html = news.css('.story').get(), #獲取內文HTML
                 content= ''.join('%s' %id for id in content_html) #將內文HTML轉換成String
                 title= ''.join('%s' %id for id in title_orginial) #將標題轉換成String
                 soup = BeautifulSoup(content,"lxml") #創立BS4處理
                 content=soup.get_text() #使用BS4將HTML轉至文字
                 content=' '.join(content.split()) #去除額外的標籤與unicode的部分
-                title=' '.join(title.split()) #去除額外的標籤與unicode的部分
-                content = self.ContentProcess(content)
-                source = ' ETtoday新聞雲' #設定來源
-                yield { #回傳資訊
-                    'keyword': self.kW,
-                    'title' : title,
-                    'time' : time,
-                    'author' :author,
-                    'content' :content,
-                    'source':self.name,
-                    'url': self.start_urls[0]
-                }
+                items['title']=' '.join(title.split()) #去除額外的標籤與unicode的部分
+                items['content'] = self.ContentProcess(content)
+                items['source'] = ' ETtoday新聞雲' #設定來源
+                items['keyword'] = self.kW
+                items['url'] = self.start_urls[0]
+                yield(items) #回傳資訊                
     def ContentProcess(self,content):#LTN內容處理
         content = str(content)
         keep_reading_msg='請繼續往下閱讀...'
@@ -151,29 +129,24 @@ class ltnNewsSpider(scrapy.Spider):
         Rule(LinkExtractor(deny=('topic/*')), callback = 'parse'))
 
     def parse(self, response):
+        items = VscodeSshScrapyTestItem()#匯入items
         content = ''
         for news in response.xpath('/html/body/div[10]'):
-                title = news.css('div.whitecon:nth-child(16) > h1:nth-child(1)::text').get(), #獲取標題(ltn的whitecon:nth-child(數目),數目要+1)
+                items['title'] = news.css('div.whitecon:nth-child(16) > h1:nth-child(1)::text').get(), #獲取標題(ltn的whitecon:nth-child(數目),數目要+1)
                 time = news.css('.time::text').get(), #獲取文章時間
-                author = news.css('.text > p:nth-child(3)').re(r'〔.*〕'), #獲取作者
+                items['author'] = news.css('.text > p:nth-child(3)').re(r'〔.*〕'), #獲取作者
                 content_html = news.css('.text').get(), #獲取內文HTML
                 content= ''.join('%s' %id for id in content_html) #將內文HTML轉換成String
                 time=''.join('%s' %id for id in time) #將時間轉換成String
                 soup = BeautifulSoup(content,"lxml") #創立BS4處理
                 content=soup.get_text() #使用BS4將HTML轉至文字
                 content=' '.join(content.split()) #去除額外的標籤與unicode的部分
-                content = self.ContentProcess(content)
-                time=' '.join(time.split()) #去除額外的標籤與unicode的部分
-                source = '自由時報' #設定來源
-                yield { #回傳資訊
-                    'keyword': self.kW,
-                    'title' : title,
-                    'time' : time,
-                    'author' :author,
-                    'content' :content,
-                    'source':self.name,
-                    'url': self.start_urls[0]
-                }
+                items['content'] = self.ContentProcess(content)
+                items['time'] =' '.join(time.split()) #去除額外的標籤與unicode的部分
+                items['source'] = '自由時報' #設定來源
+                items['keyword'] = self.kW
+                items['url'] = self.start_urls[0]
+                yield (items) #回傳資訊
     def ContentProcess(self,content):#LTN內容處理
         content = str(content)
         wuwan_virus_ads='相關新聞請見︰「武漢肺炎專區」請點此，更多相關訊息，帶您第一手掌握。 '
@@ -191,25 +164,22 @@ class ptsNewsSpider(scrapy.Spider):
     start_urls = [''] #起始網址
 
     def parse(self, response):
+        items = VscodeSshScrapyTestItem()#匯入items
         content = ''
         for news in response.css('body'):
-                title = news.css('body > div.main-info.article-main-info > div > div > div > h1::text').get(), #獲取標題
-                time = news.css('body > div.main-info.article-main-info > div > div > div > div.text-muted.article-info > time::text').get(), #獲取文章時間
-                author = news.css('body > div.main-info.article-main-info > div > div > div > div.text-muted.article-info > span.article-reporter.mr-2::text').getall(), #獲取作者
+                items['title'] = news.css('body > div.main-info.article-main-info > div > div > div > h1::text').get(), #獲取標題
+                items['time'] = news.css('body > div.main-info.article-main-info > div > div > div > div.text-muted.article-info > time::text').get(), #獲取文章時間
+                items['author'] = news.css('body > div.main-info.article-main-info > div > div > div > div.text-muted.article-info > span.article-reporter.mr-2::text').getall(), #獲取作者
                 content_html = news.css('body > div.container > div > div.col-lg-6 > article').get(), #獲取內文HTML
                 content= ''.join('%s' %id for id in content_html) #將內文HTML轉換成String
                 soup = BeautifulSoup(content,"lxml") #創立BS4處理
                 content=soup.get_text() #使用BS4將HTML轉至文字
-                content=' '.join(content.split()) #去除額外的標籤與unicode的部分
-                yield { #回傳資訊
-                    'keyword': self.kW,
-                    'title' : title,
-                    'time' : time,
-                    'author' :author,
-                    'content' :content,
-                    'source':self.name,
-                    'url': self.start_urls[0]
-                }
+                items['content'] =' '.join(content.split()) #去除額外的標籤與unicode的部分
+                items['source'] = self.name
+                items['keyword'] = self.kW
+                items['url'] = self.start_urls[0]
+                yield (items)#回傳資訊
+
 
 class TVBSSpider(scrapy.Spider):
     kW = ''
@@ -221,24 +191,20 @@ class TVBSSpider(scrapy.Spider):
         Rule(LinkExtractor(deny=('news/searchresult/*')), callback = 'parse'))
 
     def parse(self, response):
+        items = VscodeSshScrapyTestItem()#匯入items
         for n in response.css('body'):
             title = n.css('h1::text').get(default = '沒有抓到')#獲取標題
             #處理TVBS特殊標題格式
-            title = title.replace('\u3000','')#去掉title(str)多餘的\u3000
-            time = n.css('div.icon_time.time.leftBox2::text').get(default = '沒有抓到')#獲取文章日期、時間
-            author = n.css('h4 > a::text').get(default = '沒有作者')#獲取作者
+            items['title'] = title.replace('\u3000','')#去掉title(str)多餘的\u3000
+            items['time'] = n.css('div.icon_time.time.leftBox2::text').get(default = '沒有抓到')#獲取文章日期、時間
+            items['author'] = n.css('h4 > a::text').get(default = '沒有作者')#獲取作者
             content = n.css('div.h7.margin_b20 > p::text').getall() + n.css('div.h7.margin_b20::text').getall()#獲取文章內容
-            content = self.ContentProcess(content)#文章內容處理
-            source = 'TVBS'#文章來源
-            yield{ #回傳資訊
-                'keyword': self.kW,
-                'title' : title,
-                'time' : time,
-                'author' : author,
-                'content' : content,
-                'source' : self.name,
-                'url': self.start_urls[0]
-            }
+            items['content'] = self.ContentProcess(content)#文章內容處理
+            items['source'] = 'TVBS'#文章來源
+            items['keyword'] = self.kW
+            items['url'] = self.start_urls[0]
+            yield(items) #回傳資訊
+
     def ContentProcess(self,content):#TVBS專屬內文處理
         content = str(content)
         content = content.replace('\\xa0','')
